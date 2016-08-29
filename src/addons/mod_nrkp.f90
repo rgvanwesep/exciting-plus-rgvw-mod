@@ -418,6 +418,12 @@ if (wannier) then
     ik=mpi_grid_map(nkptnr,dim_k,loc=ikloc)
     do n=1,nwantot
       do j=1,nstsv
+        ! Allow for the calculation of wann_unkmt and wann_unkit using
+        ! only a partial energy window versus the full energy window
+        ! Used for plotting only part of the Wannier function such as
+        ! plotting the contribution due to one peak
+        ! when there is a two peak structure in energy space.
+        ! wann_unk_eint is set in the input file.
         if(bndint(j,evalsvnr(j,ik),wann_unk_eint(1),wann_unk_eint(2))) then
           wann_unkmt(:,:,:,:,n,ikloc)=wann_unkmt(:,:,:,:,n,ikloc) + &
             &wfsvmtnrloc(:,:,:,:,j,ikloc)*wanncnrloc(n,j,ikloc)
