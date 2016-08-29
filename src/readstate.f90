@@ -55,6 +55,12 @@ if (iostat.ne.0) then
   write(*,*)
   stop
 end if
+
+! Slow down the parallel read process so that only a few processors
+! are reading at one time. Implemented to fix a problem with calculations
+! that use a large number of processors that manifested as a segmentation fault
+! TODO: Add a flag to turn on or off this method for implementing the parallel
+!       read
 call mpi_grid_barrier()
 do i=0,mpi_num_groups-1
   if (mod(iproc,mpi_num_groups).eq.i) then
