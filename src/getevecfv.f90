@@ -50,6 +50,14 @@ call findkpt(vpl,isym,ik)
 inquire(iolength=recl) vkl_,nmatmax_,nstfv_,nspnfv_,evecfv,vgkl_,igkig_
 open(70,file=trim(scrpath)//'EVECFV'//trim(filext),action='READ', &
  form='UNFORMATTED',access='DIRECT',recl=recl)
+
+! Slow down the parallel read process so that only a few processors
+! are reading at one time. Implemented to fix a problem with calculations
+! that use a large number of processors that manifested as a segmentation fault
+! The call to "mpi_grid_barrier" creates a bug for the "dosrlm" subroutine
+! that causes the calculation to freeze.
+! TODO: Add a flag to turn on or off this method for implementing the parallel
+!       read
 call mpi_grid_barrier()
 do i=0,mpi_num_groups-1
   if (mod(iproc,mpi_num_groups).eq.i) then
@@ -58,6 +66,7 @@ do i=0,mpi_num_groups-1
   call mpi_grid_barrier()
 enddo
 close(70)
+
 t1=abs(vkl(1,ik)-vkl_(1))+abs(vkl(2,ik)-vkl_(2))+abs(vkl(3,ik)-vkl_(3))
 if (t1.gt.epslat) then
   write(*,*)
